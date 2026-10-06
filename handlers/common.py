@@ -11,6 +11,8 @@ from utils import channel_username_from_link, join_keyboard, sign_cb
 
 log = logging.getLogger(__name__)
 
+S = lambda p: sign_cb(config.hmac_secret, p)  # noqa: E731
+
 # Short-lived cache so rapid button taps don't hammer getChatMember.
 _join_cache: dict[int, tuple[bool, float]] = {}
 JOIN_CACHE_TTL = 120
@@ -54,7 +56,7 @@ async def join_screen_text(db: Database) -> tuple[str, object]:
         "1️⃣ Tap <b>📢 Join Community</b> below\n"
         "2️⃣ Then tap <b>✅ I Have Joined</b>"
     )
-    return text, join_keyboard(sign_cb, link)
+    return text, join_keyboard(S, link)
 
 
 async def require_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
