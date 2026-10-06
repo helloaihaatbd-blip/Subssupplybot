@@ -1,4 +1,4 @@
-python-telegram-bot[webhook]>=21,<22
+python-telegram-bot[webhooks]>=21,<22
 aiosqlite>=0.19.0
 libsql>=0.1.11
 python-dotenv>=1.0.0
