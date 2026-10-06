@@ -1,0 +1,60 @@
+# Render Blueprint — NYStore-style Telegram shop bot (FREE tier).
+#
+# Two free web services sharing one Turso cloud database:
+#   1. subssupply-bot — the Telegram bot in webhook mode
+#   2. subssupply-api — the supplier/reseller HTTP API
+#
+# Deploy: Render dashboard → New → Blueprint → connect the GitHub repo.
+# Fill in every `sync: false` variable when prompted (values are secret).
+#
+# Free-tier notes:
+#   - Services sleep after ~15 min without traffic; the next Telegram
+#     update wakes the bot (~30s cold start), then it answers normally.
+#   - Disk is ephemeral: that is why the DB lives on Turso, not in SQLite.
+
+services:
+  - type: web
+    name: subssupply-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py --webhook
+    # NOTE: no healthCheckPath here on purpose. Render falls back to a plain
+    # TCP probe when it is unset, which is what we want — the PTB webhook
+    # server only answers POST on the secret token path (GET / is a 405).
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        value: "7383329076"
+      - key: HMAC_SECRET
+        generateValue: true
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: SUPPORT_USERNAME
+        value: subsmartbd
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+
+  - type: web
+    name: subssupply-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        value: "7383329076"
+      - key: HMAC_SECRET
+        generateValue: true
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.12.3"

@@ -1,0 +1,14 @@
+# Secrets — never commit
+.env
+
+# Runtime data
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
